@@ -1,6 +1,5 @@
 const path = require('path');
 const core = require('@actions/core');
-const tmp = require('tmp');
 const fs = require('fs');
 
 async function run() {
@@ -32,19 +31,10 @@ async function run() {
       throw new Error('Invalid task definition: Could not find container definition with matching name');
     }
     containerDef.image = imageURI;
-
-    // Write out a new task definition file
-    var updatedTaskDefFile = tmp.fileSync({
-      tmpdir: process.env.RUNNER_TEMP,
-      prefix: 'task-definition-',
-      postfix: '.json',
-      keep: true,
-      discardDescriptor: true
-    });
     
     const newTaskDefContents = JSON.stringify(taskDefContents, null, 2);
-    fs.writeFileSync(updatedTaskDefFile.name, newTaskDefContents);
-    core.setOutput('task-definition', updatedTaskDefFile.name);
+    fs.writeFileSync(taskDefPath, newTaskDefContents);
+    core.setOutput('task-definition', taskDefPath);
   }
   catch (error) {
     core.setFailed(error.message);
