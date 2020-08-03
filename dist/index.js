@@ -1100,12 +1100,14 @@ async function run() {
     const taskDefContents = require(taskDefPath);
 
     // Insert the image URI
-    if (!Array.isArray(taskDefContents.containerDefinitions)) {
+    if (!Array.isArray(taskDefContents)) {
       throw new Error('Invalid task definition format: containerDefinitions section is not present or is not an array');
     }
-    const containerDef = taskDefContents.containerDefinitions.find(function(element) {
+
+    const containerDef = taskDefContents.find(function(element) {
       return element.name == containerName;
     });
+
     if (!containerDef) {
       throw new Error('Invalid task definition: Could not find container definition with matching name');
     }
@@ -1119,6 +1121,7 @@ async function run() {
       keep: true,
       discardDescriptor: true
     });
+    
     const newTaskDefContents = JSON.stringify(taskDefContents, null, 2);
     fs.writeFileSync(updatedTaskDefFile.name, newTaskDefContents);
     core.setOutput('task-definition', updatedTaskDefFile.name);
