@@ -27,9 +27,7 @@ describe('Render task definition', () => {
 
         fs.existsSync.mockReturnValue(true);
 
-        jest.mock('./task-definition.json', () => ({
-            family: 'task-def-family',
-            containerDefinitions: [
+        jest.mock('./task-definition.json', () => ([
                 {
                     name: "web",
                     image: "some-other-image"
@@ -38,8 +36,7 @@ describe('Render task definition', () => {
                     name: "sidecar",
                     image: "hello"
                 }
-            ]
-        }), { virtual: true });
+            ]), { virtual: true });
     });
 
     test('renders the task definition and creates a new task def file', async () => {
@@ -52,9 +49,7 @@ describe('Render task definition', () => {
             discardDescriptor: true
           });
         expect(fs.writeFileSync).toHaveBeenNthCalledWith(1, 'new-task-def-file-name',
-            JSON.stringify({
-                family: 'task-def-family',
-                containerDefinitions: [
+            JSON.stringify([
                     {
                         name: "web",
                         image: "nginx:latest"
@@ -63,8 +58,7 @@ describe('Render task definition', () => {
                         name: "sidecar",
                         image: "hello"
                     }
-                ]
-            }, null, 2)
+                ], null, 2)
         );
         expect(core.setOutput).toHaveBeenNthCalledWith(1, 'task-definition', 'new-task-def-file-name');
     });
@@ -75,15 +69,12 @@ describe('Render task definition', () => {
             .mockReturnValueOnce('/hello/task-definition.json') // task-definition
             .mockReturnValueOnce('web')                  // container-name
             .mockReturnValueOnce('nginx:latest');        // image
-        jest.mock('/hello/task-definition.json', () => ({
-            family: 'task-def-family',
-            containerDefinitions: [
+        jest.mock('/hello/task-definition.json', () => ([
                 {
                     name: "web",
                     image: "some-other-image"
                 }
-            ]
-        }), { virtual: true });
+            ]), { virtual: true });
 
         await run();
 
@@ -95,15 +86,12 @@ describe('Render task definition', () => {
             discardDescriptor: true
           });
         expect(fs.writeFileSync).toHaveBeenNthCalledWith(1, 'new-task-def-file-name',
-            JSON.stringify({
-                family: 'task-def-family',
-                containerDefinitions: [
+            JSON.stringify([
                     {
                         name: "web",
                         image: "nginx:latest"
                     }
-                ]
-            }, null, 2)
+                ], null, 2)
         );
         expect(core.setOutput).toHaveBeenNthCalledWith(1, 'task-definition', 'new-task-def-file-name');
     });
@@ -136,10 +124,8 @@ describe('Render task definition', () => {
     });
 
     test('error returned for malformed task definition with non-array container definition section', async () => {
-        jest.mock('./malformed-task-definition.json', () => ({
-            family: 'task-def-family',
-            containerDefinitions: {}
-        }), { virtual: true });
+        jest.mock('./malformed-task-definition.json', () => ( {}
+        ), { virtual: true });
 
         core.getInput = jest
             .fn()
@@ -153,15 +139,12 @@ describe('Render task definition', () => {
     });
 
     test('error returned for task definition without matching container name', async () => {
-        jest.mock('./missing-container-task-definition.json', () => ({
-            family: 'task-def-family',
-            containerDefinitions: [
+        jest.mock('./missing-container-task-definition.json', () => ( [
                 {
                     name: "main",
                     image: "some-other-image"
                 }
-            ]
-        }), { virtual: true });
+            ]), { virtual: true });
 
         core.getInput = jest
             .fn()

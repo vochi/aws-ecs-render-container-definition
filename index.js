@@ -20,7 +20,10 @@ async function run() {
     const taskDefContents = require(taskDefPath);
 
     // Insert the image URI
-  
+    if (!Array.isArray(taskDefContents)) {
+      throw new Error('Invalid task definition format: containerDefinitions section is not present or is not an array');
+    }
+
     const containerDef = taskDefContents.find(function(element) {
       return element.name == containerName;
     });
